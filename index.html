@@ -8,12 +8,13 @@
   <link rel="stylesheet" href="main.css">
 </head>
 <body>
-
+  
 <model-viewer src="model.glb" id="avatar" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1">
   <button class="Hotspot" id="hotspot-2" slot="hotspot-2" data-surface="1 0 0 3 2 0.490 0.501 0.009" data-visibility-attribute="visible"></button>
   <button class="Hotspot" id="hotspot-3" slot="hotspot-3" data-surface="3 0 53 64 62 0.482 0.161 0.357" data-visibility-attribute="visible"></button>
   <button class="Hotspot" id="hotspot-4" slot="hotspot-4" data-surface="4 0 426 418 69 0.211 0.063 0.726" data-visibility-attribute="visible"></button>
   <button class="Hotspot" id="hotspot-5" slot="hotspot-5" data-surface="2 0 14 13 9 0.481 0.020 0.500" data-visibility-attribute="visible"></button>
+  <button class="Hotspot" id="hotspot-6" slot="hotspot-6" data-surface="0 0 66482 66483 66484 0.685 0.250 0.065" data-visibility-attribute="visible"></button>
   <div class="progress-bar hide" slot="progress-bar">
     <div class="update-bar"></div>
   </div>
@@ -29,6 +30,7 @@ const hotspot2 = document.getElementById('hotspot-2');   // Hotspot per mail
 const hotspot3 = document.getElementById('hotspot-3');   // Hotspot per VCF
 const hotspot4 = document.getElementById('hotspot-4');   // Hotspot per nextButton
 const hotspot5 = document.getElementById('hotspot-5');   // Hotspot per phoneButton
+const hotspot6 = document.getElementById('hotspot-6');   // Hotspot per avvio/fermo animazione
 
 let animationState = 'initial';
 const pauseAtFrame1 = 30;  // Pausa al frame 30
@@ -64,14 +66,15 @@ const handleHotspotTap = () => {
 
     requestAnimationFrame(checkFrame);
   } else if (animationState === 'pausedAt30') {
-    console.log('Animazione messa in pausa al frame 30.');
-    // Mostra i bottoni per l'azione
+    console.log('Stato: pausedAt30. Gli hotspot possono ora eseguire le azioni.');
+
+    // Aggiungi azioni per gli hotspot se l'animazione è al frame 30
     if (hotspot2) {
       hotspot2.addEventListener('click', () => {
         window.open('mailto:emilio.lonardo@designopenspaces.it', '_self');
       });
     }
-    
+
     if (hotspot3) {
       hotspot3.addEventListener('click', () => {
         const downloadUrl = 'https://drive.google.com/uc?export=download&id=1DqanjcQqU1FXM29gRwWMe5noW_TxAj2U';
@@ -90,26 +93,50 @@ const handleHotspotTap = () => {
         window.open('tel:+393274942494', '_self');
       });
     }
+
+    // Hotspot 6: Gestione Start/Stop animazione
+    if (hotspot6) {
+      hotspot6.addEventListener('click', () => {
+        if (animationState === 'pausedAt30' || animationState === 'pausedAt60') {
+          console.log('Animazione ripartita.');
+          modelViewer.play();
+          isAnimating = true;
+          animationState = 'playingTo30';
+        } else {
+          console.log('Animazione fermata.');
+          modelViewer.pause();
+          isAnimating = false;
+          animationState = 'pausedAt30';
+        }
+      });
+    }
+  } else if (animationState === 'pausedAt60') {
+    console.log('Stato: pausedAt60. Riprendo animazione dall\'inizio.');
+    modelViewer.currentTime = 0;
+    modelViewer.play();
+    isAnimating = true;
+    animationState = 'playingFromStart';
+
+    const checkStart = () => {
+      console.log(`Verifica inizio (playingFromStart): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime1.toFixed(2)}`);
+      modelViewer.updateFraming();
+
+      if (modelViewer.currentTime >= pauseTime1) {
+        modelViewer.pause();
+        console.log('Animazione messa in pausa al frame 30.');
+        animationState = 'pausedAt30';
+        isAnimating = false;
+      } else {
+        requestAnimationFrame(checkStart);
+      }
+    };
+
+    requestAnimationFrame(checkStart);
   }
 };
 
 // Ascolta il tap sull'hotspot per avviare l'animazione
-hotspot2.addEventListener('click', () => {
-  if (!isAnimating) {
-    handleHotspotTap();
-  }
-});
-hotspot3.addEventListener('click', () => {
-  if (!isAnimating) {
-    handleHotspotTap();
-  }
-});
-hotspot4.addEventListener('click', () => {
-  if (!isAnimating) {
-    handleHotspotTap();
-  }
-});
-hotspot5.addEventListener('click', () => {
+hotspot6.addEventListener('click', () => {
   if (!isAnimating) {
     handleHotspotTap();
   }
