@@ -25,6 +25,122 @@
   </div>
 </model-viewer>
 
+  <script>
+const modelViewer = document.getElementById('avatar');
+const hotspot = document.getElementById('hotspot-6'); // Hotspot da cui partire
+
+let animationState = 'initial'; 
+const pauseAtFrame1 = 30;  // Pausa al frame 30
+const pauseAtFrame2 = 60;  // Pausa al frame 60
+const fps = 24;
+const pauseTime1 = pauseAtFrame1 / fps; 
+const pauseTime2 = pauseAtFrame2 / fps;
+let isAnimating = false;
+let isInAR = false;
+
+// Gestisci il click sull'hotspot
+const handleHotspotTap = () => {
+  console.log(`Tap sull'hotspot rilevato, stato corrente: ${animationState}`);
+
+  if (animationState === 'initial') {
+    console.log('Stato: initial. Avvio animazione fino al frame 30.');
+    modelViewer.currentTime = 0; 
+    modelViewer.play();
+    isAnimating = true; 
+    animationState = 'playingTo30';
+
+    const checkFrame = () => {
+      console.log(`Verifica frame (playingTo30): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime1.toFixed(2)}`);
+      modelViewer.updateFraming();
+
+      if (animationState === 'playingTo30' && modelViewer.currentTime >= pauseTime1) {
+        modelViewer.pause();
+        console.log('Animazione messa in pausa al frame 30.');
+        animationState = 'pausedAt30'; 
+        isAnimating = false; 
+      } else if (animationState === 'playingTo30') {
+        requestAnimationFrame(checkFrame); 
+      }
+    };
+    
+    requestAnimationFrame(checkFrame);
+  } else if (animationState === 'pausedAt30') {
+    console.log('Stato: pausedAt30. Riprendo animazione fino al frame 60.');
+    modelViewer.currentTime = pauseTime1;
+    modelViewer.play();
+    isAnimating = true;
+
+    const checkEnd = () => {
+      console.log(`Verifica fine (playingToEnd): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime2.toFixed(2)}`);
+      modelViewer.updateFraming();
+      
+      if (modelViewer.currentTime >= pauseTime2) {
+        modelViewer.pause();
+        console.log('Animazione finita e messa in pausa al frame 60.');
+        animationState = 'pausedAt60'; 
+        isAnimating = false; 
+      } else {
+        requestAnimationFrame(checkEnd); 
+      }
+    };
+
+    requestAnimationFrame(checkEnd);
+  } else if (animationState === 'pausedAt60') {
+    console.log('Stato: pausedAt60. Riprendo animazione dall\'inizio.');
+    modelViewer.currentTime = 0; 
+    modelViewer.play();
+    isAnimating = true;
+
+    const checkStart = () => {
+      console.log(`Verifica inizio (playingTo30): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime1.toFixed(2)}`);
+      modelViewer.updateFraming();
+      
+      if (modelViewer.currentTime >= pauseTime1) {
+        modelViewer.pause();
+        console.log('Animazione messa in pausa al frame 30.');
+        animationState = 'pausedAt30'; 
+        isAnimating = false; 
+      } else {
+        requestAnimationFrame(checkStart); 
+      }
+    };
+
+    requestAnimationFrame(checkStart);
+  }
+};
+
+// Ascolta il tap sull'hotspot per avviare l'animazione
+hotspot.addEventListener('click', () => {
+  if (!isAnimating) {
+    handleHotspotTap();
+  }
+});
+
+// Funzione per abbassare il modello 3D di 2.41828 metri
+modelViewer.addEventListener('ar-status', (event) => {
+  if (event.detail.status === 'session-started') {
+    console.log('Entrato in modalità AR.');
+    isInAR = true;
+    modelViewer.pause();
+    isAnimating = false; 
+    
+    // Abbassa il modello di 2.41828 metri
+    const heightOffset = -2.41828; // Offset negativo per abbassare il modello
+    modelViewer.position.y += heightOffset; // Modifica la posizione Y
+  } else if (event.detail.status === 'not-presenting') {
+    console.log('Uscito dalla modalità AR.');
+    isInAR = false;
+  }
+});
+
+// Evento di fine animazione
+modelViewer.addEventListener('finished', () => {
+  modelViewer.pause(); 
+  console.log('Animazione finita e messa in pausa (evento finished).');
+  animationState = 'pausedAt30';
+  isAnimating = false;
+});
+</script>
 
   
 </body>
