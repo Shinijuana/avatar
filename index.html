@@ -133,21 +133,25 @@ modelViewer.addEventListener('finished', () => {
 </script>
   
 <script>
-  // Aggiungi l'azione per gli hotspot, che fungono da pulsanti
   const hotspot2 = document.getElementById('hotspot-2');  // Mail
   const hotspot3 = document.getElementById('hotspot-3');  // VCF
   const hotspot4 = document.getElementById('hotspot-4');  // NextButton
   const hotspot5 = document.getElementById('hotspot-5');  // PhoneButton
+  const iframe = document.getElementById('contentIframe');  // L'iframe
+
+  // Funzione per aprire l'iframe con un contenuto specifico
+  function openIframe(contentUrl) {
+    iframe.src = contentUrl;  // Imposta l'URL del contenuto da caricare nell'iframe
+    iframe.style.display = 'block';  // Mostra l'iframe
+  }
 
   // Hotspot 2 - Attiva Mail
   if (hotspot2) {
     hotspot2.addEventListener('click', (event) => {
       event.preventDefault();  // Previeni l'uscita dalla modalità AR
       console.log("Cliccato su Hotspot 2 (Mail)");
-      window.open('mailto:emilio.lonardo@designopenspaces.it', '_self');
+      openIframe('mailto:emilio.lonardo@designopenspaces.it');  // Apri Mail nel'iframe
     });
-  } else {
-    console.log("Hotspot 2 non trovato!");
   }
 
   // Hotspot 3 - Attiva VCF
@@ -155,11 +159,8 @@ modelViewer.addEventListener('finished', () => {
     hotspot3.addEventListener('click', (event) => {
       event.preventDefault();  // Previeni l'uscita dalla modalità AR
       console.log("Cliccato su Hotspot 3 (VCF)");
-      const downloadUrl = 'https://drive.google.com/uc?export=download&id=1DqanjcQqU1FXM29gRwWMe5noW_TxAj2U';
-      window.open(downloadUrl, '_self');
+      openIframe('https://drive.google.com/uc?export=download&id=1DqanjcQqU1FXM29gRwWMe5noW_TxAj2U');  // Apri il VCF nell'iframe
     });
-  } else {
-    console.log("Hotspot 3 non trovato!");
   }
 
   // Hotspot 4 - Attiva NextButton
@@ -167,10 +168,8 @@ modelViewer.addEventListener('finished', () => {
     hotspot4.addEventListener('click', (event) => {
       event.preventDefault();  // Previeni l'uscita dalla modalità AR
       console.log("Cliccato su Hotspot 4 (NextButton)");
-      window.open('https://designopenspaces.it/', '_blank');
+      openIframe('https://designopenspaces.it/');  // Carica la pagina del sito web nell'iframe
     });
-  } else {
-    console.log("Hotspot 4 non trovato!");
   }
 
   // Hotspot 5 - Attiva PhoneButton
@@ -178,10 +177,8 @@ modelViewer.addEventListener('finished', () => {
     hotspot5.addEventListener('click', (event) => {
       event.preventDefault();  // Previeni l'uscita dalla modalità AR
       console.log("Cliccato su Hotspot 5 (PhoneButton)");
-      window.open('tel:+393274942494', '_self');
+      openIframe('tel:+393274942494');  // Apri il numero di telefono nell'iframe
     });
-  } else {
-    console.log("Hotspot 5 non trovato!");
   }
 </script>
 
