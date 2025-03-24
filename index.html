@@ -26,102 +26,91 @@
 </model-viewer>
 
   <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const modelViewer = document.getElementById('avatar');
-    const hotspot = document.getElementById('hotspot-6'); // Il riferimento corretto per l'hotspot-6
+const modelViewer = document.getElementById('avatar');  // ID corretto per il modello
+const hotspot = document.getElementById('hotspot-6');   // Hotspot che avvia l'animazione
 
-    if (!modelViewer || !hotspot) {
-        console.error("Elemento non trovato nel DOM!");
-        return;
-    }
+let animationState = 'initial';
+const pauseAtFrame1 = 30;  // Pausa al frame 30
+const pauseAtFrame2 = 60;  // Pausa al frame 60
+const fps = 24;
+const pauseTime1 = pauseAtFrame1 / fps; 
+const pauseTime2 = pauseAtFrame2 / fps;
+let isAnimating = false;
 
-    let animationState = 'initial'; 
-    const pauseAtFrame1 = 30;  // Pausa al frame 30
-    const pauseAtFrame2 = 60;  // Pausa al frame 60
-    const fps = 24;
-    const pauseTime1 = pauseAtFrame1 / fps; 
-    const pauseTime2 = pauseAtFrame2 / fps;
-    let isAnimating = false;
+const handleHotspotTap = () => {
+  console.log(`Tap hotspot rilevato, stato corrente: ${animationState}`);
 
-    const handleHotspotTap = () => {
-        console.log(`Tap sull'hotspot rilevato, stato corrente: ${animationState}`);
+  if (animationState === 'initial') {
+    console.log('Stato: initial. Avvio animazione fino al frame 30.');
+    modelViewer.currentTime = 0;
+    modelViewer.play();
+    isAnimating = true;
+    animationState = 'playingTo30';
 
-        // Se l'animazione è già completa o in pausa al frame 60, dobbiamo ricominciare dall'inizio
-        if (animationState === 'pausedAt60' || animationState === 'initial') {
-            console.log('Stato: initial o pausedAt60. Avvio animazione dall\'inizio.');
-            modelViewer.currentTime = 0; 
-            modelViewer.play();
-            isAnimating = true; 
-            animationState = 'playingTo30'; // Settiamo lo stato su playingTo30 per il primo intervallo
+    const checkFrame = () => {
+      console.log(`Verifica frame (playingTo30): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime1.toFixed(2)}`);
+      modelViewer.updateFraming();
 
-            const checkFrame = () => {
-                console.log(`Verifica frame (playingTo30): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime1.toFixed(2)}`);
-                modelViewer.updateFraming();
-
-                if (animationState === 'playingTo30' && modelViewer.currentTime >= pauseTime1) {
-                    modelViewer.pause();
-                    console.log('Animazione messa in pausa al frame 30.');
-                    animationState = 'pausedAt30'; 
-                    isAnimating = false; 
-                } else if (animationState === 'playingTo30') {
-                    requestAnimationFrame(checkFrame); 
-                }
-            };
-
-            requestAnimationFrame(checkFrame);
-        }
-        // Se l'animazione è in pausa al frame 30, proseguiamo fino al frame 60
-        else if (animationState === 'pausedAt30') {
-            console.log('Stato: pausedAt30. Riprendo animazione fino al frame 60.');
-            modelViewer.currentTime = pauseTime1;
-            modelViewer.play();
-            isAnimating = true;
-
-            const checkEnd = () => {
-                console.log(`Verifica fine (playingToEnd): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime2.toFixed(2)}`);
-                modelViewer.updateFraming();
-                
-                if (modelViewer.currentTime >= pauseTime2) {
-                    modelViewer.pause();
-                    console.log('Animazione messa in pausa al frame 60.');
-                    animationState = 'pausedAt60'; 
-                    isAnimating = false; 
-                } else {
-                    requestAnimationFrame(checkEnd); 
-                }
-            };
-
-            requestAnimationFrame(checkEnd);
-        }
+      if (animationState === 'playingTo30' && modelViewer.currentTime >= pauseTime1) {
+        modelViewer.pause();
+        console.log('Animazione messa in pausa al frame 30.');
+        animationState = 'pausedAt30';
+        isAnimating = false;
+      } else if (animationState === 'playingTo30') {
+        requestAnimationFrame(checkFrame);
+      }
     };
 
-    // Ascolta il tap sull'hotspot per avviare l'animazione
-    hotspot.addEventListener('click', () => {
-        if (!isAnimating) {
-            handleHotspotTap();
-        }
-    });
+    requestAnimationFrame(checkFrame);
+  } else if (animationState === 'pausedAt30') {
+    console.log('Stato: pausedAt30. Riprendo animazione fino al frame 60.');
+    modelViewer.currentTime = pauseTime1;
+    modelViewer.play();
+    isAnimating = true;
 
-    // Funzione per abbassare il modello 3D di 2.41828 metri
-    modelViewer.addEventListener('ar-status', (event) => {
-        if (event.detail.status === 'session-started') {
-            console.log('Entrato in modalità AR.');
-            modelViewer.pause();
-            isAnimating = false; 
-        } else if (event.detail.status === 'not-presenting') {
-            console.log('Uscito dalla modalità AR.');
-        }
-    });
+    const checkEnd = () => {
+      console.log(`Verifica fine (playingToEnd): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime2.toFixed(2)}`);
+      modelViewer.updateFraming();
 
-    // Evento di fine animazione (aggiunto per prevenire loop o ripartenze non volute)
-    modelViewer.addEventListener('finished', () => {
-        modelViewer.pause(); 
-        console.log('Animazione finita e messa in pausa (evento finished).');
+      if (modelViewer.currentTime >= pauseTime2) {
+        modelViewer.pause();
+        console.log('Animazione messa in pausa al frame 60.');
         animationState = 'pausedAt60';
         isAnimating = false;
-    });
+      } else {
+        requestAnimationFrame(checkEnd);
+      }
+    };
+
+    requestAnimationFrame(checkEnd);
+  }
+};
+
+// Ascolta il tap sull'hotspot per avviare l'animazione
+hotspot.addEventListener('click', () => {
+  if (!isAnimating) {
+    handleHotspotTap();
+  }
 });
 
+// Funzione per abbassare il modello 3D di 2.41828 metri
+modelViewer.addEventListener('ar-status', (event) => {
+  if (event.detail.status === 'session-started') {
+    console.log('Entrato in modalità AR.');
+    modelViewer.pause();
+    isAnimating = false;
+  } else if (event.detail.status === 'not-presenting') {
+    console.log('Uscito dalla modalità AR.');
+  }
+});
+
+// Evento di fine animazione
+modelViewer.addEventListener('finished', () => {
+  modelViewer.pause();
+  console.log('Animazione finita e messa in pausa (evento finished).');
+  animationState = 'pausedAt60';  // Pausa finale al frame 60
+  isAnimating = false;
+});
 </script>
 
   
