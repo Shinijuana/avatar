@@ -8,13 +8,12 @@
   <link rel="stylesheet" href="main.css">
 </head>
 <body>
-  
+
 <model-viewer src="model.glb" id="avatar" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1">
   <button class="Hotspot" id="hotspot-2" slot="hotspot-2" data-surface="1 0 0 3 2 0.490 0.501 0.009" data-visibility-attribute="visible"></button>
   <button class="Hotspot" id="hotspot-3" slot="hotspot-3" data-surface="3 0 53 64 62 0.482 0.161 0.357" data-visibility-attribute="visible"></button>
   <button class="Hotspot" id="hotspot-4" slot="hotspot-4" data-surface="4 0 426 418 69 0.211 0.063 0.726" data-visibility-attribute="visible"></button>
   <button class="Hotspot" id="hotspot-5" slot="hotspot-5" data-surface="2 0 14 13 9 0.481 0.020 0.500" data-visibility-attribute="visible"></button>
-  <button class="Hotspot" id="hotspot-6" slot="hotspot-6" data-surface="0 0 66482 66483 66484 0.685 0.250 0.065" data-visibility-attribute="visible"></button>
   <div class="progress-bar hide" slot="progress-bar">
     <div class="update-bar"></div>
   </div>
@@ -26,7 +25,10 @@
 
 <script>
 const modelViewer = document.getElementById('avatar');  // ID corretto per il modello
-const hotspot = document.getElementById('hotspot-6');   // Hotspot che avvia l'animazione
+const hotspot2 = document.getElementById('hotspot-2');   // Hotspot per mail
+const hotspot3 = document.getElementById('hotspot-3');   // Hotspot per VCF
+const hotspot4 = document.getElementById('hotspot-4');   // Hotspot per nextButton
+const hotspot5 = document.getElementById('hotspot-5');   // Hotspot per phoneButton
 
 let animationState = 'initial';
 const pauseAtFrame1 = 30;  // Pausa al frame 30
@@ -62,53 +64,52 @@ const handleHotspotTap = () => {
 
     requestAnimationFrame(checkFrame);
   } else if (animationState === 'pausedAt30') {
-    console.log('Stato: pausedAt30. Riprendo animazione fino al frame 60.');
-    modelViewer.currentTime = pauseTime1;
-    modelViewer.play();
-    isAnimating = true;
+    console.log('Animazione messa in pausa al frame 30.');
+    // Mostra i bottoni per l'azione
+    if (hotspot2) {
+      hotspot2.addEventListener('click', () => {
+        window.open('mailto:emilio.lonardo@designopenspaces.it', '_self');
+      });
+    }
+    
+    if (hotspot3) {
+      hotspot3.addEventListener('click', () => {
+        const downloadUrl = 'https://drive.google.com/uc?export=download&id=1DqanjcQqU1FXM29gRwWMe5noW_TxAj2U';
+        window.open(downloadUrl, '_self');
+      });
+    }
 
-    const checkEnd = () => {
-      console.log(`Verifica fine (playingToEnd): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime2.toFixed(2)}`);
-      modelViewer.updateFraming();
+    if (hotspot4) {
+      hotspot4.addEventListener('click', () => {
+        window.open('https://designopenspaces.it/', '_blank');
+      });
+    }
 
-      if (modelViewer.currentTime >= pauseTime2) {
-        modelViewer.pause();
-        console.log('Animazione messa in pausa al frame 60.');
-        animationState = 'pausedAt60';
-        isAnimating = false;
-      } else {
-        requestAnimationFrame(checkEnd);
-      }
-    };
-
-    requestAnimationFrame(checkEnd);
-  } else if (animationState === 'pausedAt60') {
-    console.log('Stato: pausedAt60. Riprendo animazione dall\'inizio.');
-    modelViewer.currentTime = 0;
-    modelViewer.play();
-    isAnimating = true;
-    animationState = 'playingFromStart';
-
-    const checkStart = () => {
-      console.log(`Verifica inizio (playingFromStart): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime1.toFixed(2)}`);
-      modelViewer.updateFraming();
-
-      if (modelViewer.currentTime >= pauseTime1) {
-        modelViewer.pause();
-        console.log('Animazione messa in pausa al frame 30.');
-        animationState = 'pausedAt30';
-        isAnimating = false;
-      } else {
-        requestAnimationFrame(checkStart);
-      }
-    };
-
-    requestAnimationFrame(checkStart);
+    if (hotspot5) {
+      hotspot5.addEventListener('click', () => {
+        window.open('tel:+393274942494', '_self');
+      });
+    }
   }
 };
 
 // Ascolta il tap sull'hotspot per avviare l'animazione
-hotspot.addEventListener('click', () => {
+hotspot2.addEventListener('click', () => {
+  if (!isAnimating) {
+    handleHotspotTap();
+  }
+});
+hotspot3.addEventListener('click', () => {
+  if (!isAnimating) {
+    handleHotspotTap();
+  }
+});
+hotspot4.addEventListener('click', () => {
+  if (!isAnimating) {
+    handleHotspotTap();
+  }
+});
+hotspot5.addEventListener('click', () => {
   if (!isAnimating) {
     handleHotspotTap();
   }
