@@ -23,168 +23,170 @@
     <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
   </div>
   <script>
-const modelViewer = document.getElementById('avatar');  // ID corretto per il modello
-const hotspot = document.getElementById('hotspot-6');   // Hotspot che avvia l'animazione
+    const modelViewer = document.getElementById('avatar');  // ID corretto per il modello
+    const hotspot = document.getElementById('hotspot-6');   // Hotspot che avvia l'animazione
 
-let animationState = 'initial';
-const pauseAtFrame1 = 30;  // Pausa al frame 30
-const pauseAtFrame2 = 59;  // Pausa al frame 60
-const fps = 24;
-const pauseTime1 = pauseAtFrame1 / fps; 
-const pauseTime2 = pauseAtFrame2 / fps;
-let isAnimating = false;
+    let animationState = 'initial';
+    const pauseAtFrame1 = 30;  // Pausa al frame 30
+    const pauseAtFrame2 = 59;  // Pausa al frame 60
+    const fps = 24;
+    const pauseTime1 = pauseAtFrame1 / fps; 
+    const pauseTime2 = pauseAtFrame2 / fps;
+    let isAnimating = false;
 
-const handleHotspotTap = () => {
-  console.log(`Tap hotspot rilevato, stato corrente: ${animationState}`);
+    const handleHotspotTap = () => {
+      console.log(`Tap hotspot rilevato, stato corrente: ${animationState}`);
 
-  if (animationState === 'initial') {
-    console.log('Stato: initial. Avvio animazione fino al frame 30.');
-    modelViewer.currentTime = 0;
-    modelViewer.play();
-    isAnimating = true;
-    animationState = 'playingTo30';
+      if (animationState === 'initial') {
+        console.log('Stato: initial. Avvio animazione fino al frame 30.');
+        modelViewer.currentTime = 0;
+        modelViewer.play();
+        isAnimating = true;
+        animationState = 'playingTo30';
 
-    const checkFrame = () => {
-      console.log(`Verifica frame (playingTo30): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime1.toFixed(2)}`);
-      modelViewer.updateFraming();
+        const checkFrame = () => {
+          console.log(`Verifica frame (playingTo30): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime1.toFixed(2)}`);
+          modelViewer.updateFraming();
 
-      if (animationState === 'playingTo30' && modelViewer.currentTime >= pauseTime1) {
-        modelViewer.pause();
-        console.log('Animazione messa in pausa al frame 30.');
-        animationState = 'pausedAt30';
-        isAnimating = false;
-      } else if (animationState === 'playingTo30') {
+          if (animationState === 'playingTo30' && modelViewer.currentTime >= pauseTime1) {
+            modelViewer.pause();
+            console.log('Animazione messa in pausa al frame 30.');
+            animationState = 'pausedAt30';
+            isAnimating = false;
+          } else if (animationState === 'playingTo30') {
+            requestAnimationFrame(checkFrame);
+          }
+        };
+
         requestAnimationFrame(checkFrame);
-      }
-    };
+      } else if (animationState === 'pausedAt30') {
+        console.log('Stato: pausedAt30. Riprendo animazione fino al frame 60.');
+        modelViewer.currentTime = pauseTime1;
+        modelViewer.play();
+        isAnimating = true;
 
-    requestAnimationFrame(checkFrame);
-  } else if (animationState === 'pausedAt30') {
-    console.log('Stato: pausedAt30. Riprendo animazione fino al frame 60.');
-    modelViewer.currentTime = pauseTime1;
-    modelViewer.play();
-    isAnimating = true;
+        const checkEnd = () => {
+          console.log(`Verifica fine (playingToEnd): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime2.toFixed(2)}`);
+          modelViewer.updateFraming();
 
-    const checkEnd = () => {
-      console.log(`Verifica fine (playingToEnd): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime2.toFixed(2)}`);
-      modelViewer.updateFraming();
+          if (modelViewer.currentTime >= pauseTime2) {
+            modelViewer.pause();
+            console.log('Animazione messa in pausa al frame 60.');
+            animationState = 'pausedAt60';
+            isAnimating = false;
+          } else {
+            requestAnimationFrame(checkEnd);
+          }
+        };
 
-      if (modelViewer.currentTime >= pauseTime2) {
-        modelViewer.pause();
-        console.log('Animazione messa in pausa al frame 60.');
-        animationState = 'pausedAt60';
-        isAnimating = false;
-      } else {
         requestAnimationFrame(checkEnd);
-      }
-    };
+      } else if (animationState === 'pausedAt60') {
+        console.log('Stato: pausedAt60. Riprendo animazione dall\'inizio.');
+        modelViewer.currentTime = 0;
+        modelViewer.play();
+        isAnimating = true;
+        animationState = 'playingFromStart';
 
-    requestAnimationFrame(checkEnd);
-  } else if (animationState === 'pausedAt60') {
-    console.log('Stato: pausedAt60. Riprendo animazione dall\'inizio.');
-    modelViewer.currentTime = 0;
-    modelViewer.play();
-    isAnimating = true;
-    animationState = 'playingFromStart';
+        const checkStart = () => {
+          console.log(`Verifica inizio (playingFromStart): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime1.toFixed(2)}`);
+          modelViewer.updateFraming();
 
-    const checkStart = () => {
-      console.log(`Verifica inizio (playingFromStart): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime1.toFixed(2)}`);
-      modelViewer.updateFraming();
+          if (modelViewer.currentTime >= pauseTime1) {
+            modelViewer.pause();
+            console.log('Animazione messa in pausa al frame 30.');
+            animationState = 'pausedAt30';
+            isAnimating = false;
+          } else {
+            requestAnimationFrame(checkStart);
+          }
+        };
 
-      if (modelViewer.currentTime >= pauseTime1) {
-        modelViewer.pause();
-        console.log('Animazione messa in pausa al frame 30.');
-        animationState = 'pausedAt30';
-        isAnimating = false;
-      } else {
         requestAnimationFrame(checkStart);
       }
     };
 
-    requestAnimationFrame(checkStart);
-  }
-};
-
-// Ascolta il tap sull'hotspot per avviare l'animazione
-hotspot.addEventListener('click', () => {
-  if (!isAnimating) {
-    handleHotspotTap();
-  }
-});
-
-// Funzione per abbassare il modello 3D di 2.41828 metri
-modelViewer.addEventListener('ar-status', (event) => {
-  if (event.detail.status === 'session-started') {
-    console.log('Entrato in modalità AR.');
-    modelViewer.pause();
-    isAnimating = false;
-  } else if (event.detail.status === 'not-presenting') {
-    console.log('Uscito dalla modalità AR.');
-  }
-});
-
-// Evento di fine animazione
-modelViewer.addEventListener('finished', () => {
-  modelViewer.pause();
-  console.log('Animazione finita e messa in pausa (evento finished).');
-  animationState = 'pausedAt60';  // Pausa finale al frame 60
-  isAnimating = false;
-});
-</script>
-  
-<script>
-  const hotspot2 = document.getElementById('hotspot-2');  // Mail
-  const hotspot3 = document.getElementById('hotspot-3');  // VCF
-  const hotspot4 = document.getElementById('hotspot-4');  // NextButton
-  const hotspot5 = document.getElementById('hotspot-5');  // PhoneButton
-  const iframe = document.getElementById('contentIframe');  // L'iframe
-
-  // Funzione per aprire l'iframe con un contenuto specifico
-  function openIframe(contentUrl) {
-    iframe.src = contentUrl;  // Imposta l'URL del contenuto da caricare nell'iframe
-    iframe.style.display = 'block';  // Mostra l'iframe
-  }
-
-  // Hotspot 2 - Attiva Mail
-  if (hotspot2) {
-    hotspot2.addEventListener('click', (event) => {
-      event.preventDefault();  // Previeni l'uscita dalla modalità AR
-      console.log("Cliccato su Hotspot 2 (Mail)");
-      openIframe('mailto:emilio.lonardo@designopenspaces.it');  // Apri Mail nel'iframe
+    // Ascolta il tap sull'hotspot per avviare l'animazione
+    hotspot.addEventListener('click', () => {
+      if (!isAnimating) {
+        handleHotspotTap();
+      }
     });
-  }
 
-  // Hotspot 3 - Attiva VCF
-  if (hotspot3) {
-    hotspot3.addEventListener('click', (event) => {
-      event.preventDefault();  // Previeni l'uscita dalla modalità AR
-      console.log("Cliccato su Hotspot 3 (VCF)");
-      openIframe('https://drive.google.com/uc?export=download&id=1DqanjcQqU1FXM29gRwWMe5noW_TxAj2U');  // Apri il VCF nell'iframe
+    // Funzione per abbassare il modello 3D di 2.41828 metri
+    modelViewer.addEventListener('ar-status', (event) => {
+      if (event.detail.status === 'session-started') {
+        console.log('Entrato in modalità AR.');
+        modelViewer.pause();
+        isAnimating = false;
+      } else if (event.detail.status === 'not-presenting') {
+        console.log('Uscito dalla modalità AR.');
+      }
     });
-  }
 
-  // Hotspot 4 - Attiva NextButton
-  if (hotspot4) {
-    hotspot4.addEventListener('click', (event) => {
-      event.preventDefault();  // Previeni l'uscita dalla modalità AR
-      console.log("Cliccato su Hotspot 4 (NextButton)");
-      openIframe('https://designopenspaces.it/');  // Carica la pagina del sito web nell'iframe
+    // Evento di fine animazione
+    modelViewer.addEventListener('finished', () => {
+      modelViewer.pause();
+      console.log('Animazione finita e messa in pausa (evento finished).');
+      animationState = 'pausedAt60';  // Pausa finale al frame 60
+      isAnimating = false;
     });
-  }
+  </script>
 
-  // Hotspot 5 - Attiva PhoneButton
-  if (hotspot5) {
-    hotspot5.addEventListener('click', (event) => {
-      event.preventDefault();  // Previeni l'uscita dalla modalità AR
-      console.log("Cliccato su Hotspot 5 (PhoneButton)");
-      openIframe('tel:+393274942494');  // Apri il numero di telefono nell'iframe
-    });
-  }
-</script>
+  <script>
+    const hotspot2 = document.getElementById('hotspot-2');  // Mail
+    const hotspot3 = document.getElementById('hotspot-3');  // VCF
+    const hotspot4 = document.getElementById('hotspot-4');  // NextButton
+    const hotspot5 = document.getElementById('hotspot-5');  // PhoneButton
+    const iframe = document.getElementById('contentIframe');  // L'iframe
+
+    // Funzione per aprire l'iframe con un contenuto specifico
+    function openIframe(contentUrl) {
+      if (iframe) {
+        iframe.src = contentUrl;  // Imposta l'URL del contenuto da caricare nell'iframe
+        iframe.style.display = 'block';  // Mostra l'iframe
+      } else {
+        console.error("Errore: iframe non trovato nel DOM.");
+      }
+    }
+
+    // Hotspot 2 - Attiva Mail
+    if (hotspot2) {
+      hotspot2.addEventListener('click', (event) => {
+        event.preventDefault();  // Previeni l'uscita dalla modalità AR
+        console.log("Cliccato su Hotspot 2 (Mail)");
+        openIframe('mailto:emilio.lonardo@designopenspaces.it');  // Apri Mail nel'iframe
+      });
+    }
+
+    // Hotspot 3 - Attiva VCF
+    if (hotspot3) {
+      hotspot3.addEventListener('click', (event) => {
+        event.preventDefault();  // Previeni l'uscita dalla modalità AR
+        console.log("Cliccato su Hotspot 3 (VCF)");
+        openIframe('https://drive.google.com/uc?export=download&id=1DqanjcQqU1FXM29gRwWMe5noW_TxAj2U');  // Apri il VCF nell'iframe
+      });
+    }
+
+    // Hotspot 4 - Attiva NextButton
+    if (hotspot4) {
+      hotspot4.addEventListener('click', (event) => {
+        event.preventDefault();  // Previeni l'uscita dalla modalità AR
+        console.log("Cliccato su Hotspot 4 (NextButton)");
+        openIframe('https://designopenspaces.it/');  // Carica la pagina del sito web nell'iframe
+      });
+    }
+
+    // Hotspot 5 - Attiva PhoneButton
+    if (hotspot5) {
+      hotspot5.addEventListener('click', (event) => {
+        event.preventDefault();  // Previeni l'uscita dalla modalità AR
+        console.log("Cliccato su Hotspot 5 (PhoneButton)");
+        openIframe('tel:+393274942494');  // Apri il numero di telefono nell'iframe
+      });
+    }
+  </script>
 
 </model-viewer>
-
-
 
 </body>
 </html>
