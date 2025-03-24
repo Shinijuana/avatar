@@ -26,11 +26,7 @@
 
 <script>
 const modelViewer = document.getElementById('avatar');  // ID corretto per il modello
-const hotspot2 = document.getElementById('hotspot-2');   // Hotspot per mail
-const hotspot3 = document.getElementById('hotspot-3');   // Hotspot per VCF
-const hotspot4 = document.getElementById('hotspot-4');   // Hotspot per nextButton
-const hotspot5 = document.getElementById('hotspot-5');   // Hotspot per phoneButton
-const hotspot6 = document.getElementById('hotspot-6');   // Hotspot per avvio/fermo animazione
+const hotspot = document.getElementById('hotspot-6');   // Hotspot che avvia l'animazione
 
 let animationState = 'initial';
 const pauseAtFrame1 = 30;  // Pausa al frame 30
@@ -66,50 +62,26 @@ const handleHotspotTap = () => {
 
     requestAnimationFrame(checkFrame);
   } else if (animationState === 'pausedAt30') {
-    console.log('Stato: pausedAt30. Gli hotspot possono ora eseguire le azioni.');
+    console.log('Stato: pausedAt30. Riprendo animazione fino al frame 60.');
+    modelViewer.currentTime = pauseTime1;
+    modelViewer.play();
+    isAnimating = true;
 
-    // Aggiungi azioni per gli hotspot se l'animazione è al frame 30
-    if (hotspot2) {
-      hotspot2.addEventListener('click', () => {
-        window.open('mailto:emilio.lonardo@designopenspaces.it', '_self');
-      });
-    }
+    const checkEnd = () => {
+      console.log(`Verifica fine (playingToEnd): currentTime = ${modelViewer.currentTime.toFixed(2)}, pauseTime = ${pauseTime2.toFixed(2)}`);
+      modelViewer.updateFraming();
 
-    if (hotspot3) {
-      hotspot3.addEventListener('click', () => {
-        const downloadUrl = 'https://drive.google.com/uc?export=download&id=1DqanjcQqU1FXM29gRwWMe5noW_TxAj2U';
-        window.open(downloadUrl, '_self');
-      });
-    }
+      if (modelViewer.currentTime >= pauseTime2) {
+        modelViewer.pause();
+        console.log('Animazione messa in pausa al frame 60.');
+        animationState = 'pausedAt60';
+        isAnimating = false;
+      } else {
+        requestAnimationFrame(checkEnd);
+      }
+    };
 
-    if (hotspot4) {
-      hotspot4.addEventListener('click', () => {
-        window.open('https://designopenspaces.it/', '_blank');
-      });
-    }
-
-    if (hotspot5) {
-      hotspot5.addEventListener('click', () => {
-        window.open('tel:+393274942494', '_self');
-      });
-    }
-
-    // Hotspot 6: Gestione Start/Stop animazione
-    if (hotspot6) {
-      hotspot6.addEventListener('click', () => {
-        if (animationState === 'pausedAt30' || animationState === 'pausedAt60') {
-          console.log('Animazione ripartita.');
-          modelViewer.play();
-          isAnimating = true;
-          animationState = 'playingTo30';
-        } else {
-          console.log('Animazione fermata.');
-          modelViewer.pause();
-          isAnimating = false;
-          animationState = 'pausedAt30';
-        }
-      });
-    }
+    requestAnimationFrame(checkEnd);
   } else if (animationState === 'pausedAt60') {
     console.log('Stato: pausedAt60. Riprendo animazione dall\'inizio.');
     modelViewer.currentTime = 0;
@@ -136,7 +108,7 @@ const handleHotspotTap = () => {
 };
 
 // Ascolta il tap sull'hotspot per avviare l'animazione
-hotspot6.addEventListener('click', () => {
+hotspot.addEventListener('click', () => {
   if (!isAnimating) {
     handleHotspotTap();
   }
